@@ -88,8 +88,13 @@ function getFirstResolvedPromiseResult(promises) {
  * [promise3, promise6, promise2] => Promise rejected with 2
  * [promise3, promise4, promise6] => Promise rejected with 6
  */
-function getFirstPromiseResult(/* promises */) {
-  throw new Error('Not implemented');
+function getFirstPromiseResult(promises) {
+  const result = new Promise((resolve, reject) => {
+    Promise.race(promises)
+      .then((value) => resolve(value))
+      .catch((value) => reject(value));
+  });
+  return result;
 }
 
 /**
@@ -103,8 +108,13 @@ function getFirstPromiseResult(/* promises */) {
  * [Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)] => Promise fulfilled with [1, 2, 3]
  * [Promise.resolve(1), Promise.reject(2), Promise.resolve(3)] => Promise rejected with 2
  */
-function getAllOrNothing(/* promises */) {
-  throw new Error('Not implemented');
+function getAllOrNothing(promises) {
+  const result = new Promise((resolve, reject) => {
+    Promise.all(promises)
+      .then((value) => resolve(value))
+      .catch((value) => reject(value));
+  });
+  return result;
 }
 
 /**
@@ -119,8 +129,20 @@ function getAllOrNothing(/* promises */) {
  * [Promise.resolve(1), Promise.resolve(2), Promise.resolve(3)] => Promise fulfilled with [1, 2, 3]
  * [Promise.resolve(1), Promise.reject(2), Promise.resolve(3)]  => Promise fulfilled with [1, null, 3]
  */
-function getAllResult(/* promises */) {
-  throw new Error('Not implemented');
+function getAllResult(promises) {
+  const result = new Promise((resolve, reject) => {
+    Promise.allSettled(promises)
+      .then((values) => {
+        const res = [];
+        values.forEach((el) => {
+          if ('reason' in el) res.push(null);
+          else res.push(el.value);
+        });
+        resolve(res);
+      })
+      .catch(() => reject());
+  });
+  return result;
 }
 
 /**
